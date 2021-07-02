@@ -6,12 +6,15 @@ import {
     DeviceEventEmitter
 } from "react-native";
 import { connect } from "react-redux";
-import { updateCommand, updateSendCommand } from "../action/DefaultAction";
+import { resetStore, updateCommand, updateSendCommand } from "../action/DefaultAction";
 import { COMMON_STYLE } from "../common/style/CommonStyle";
 import { checkSum, CMD_ACK, CMD_NACK, getMessageActiveWithCheckSum, sendMsg } from "../util/HardwareCalculator";
 import { RNSerialport, definitions, actions } from "react-native-serialport";
 import { scale } from "../util/Scale";
 import { TextInput } from "react-native-gesture-handler";
+import { ROUTER } from "../navigator/RouterName";
+import { CommonActions } from '@react-navigation/native';
+import RNRestart from 'react-native-restart';
 class LoginScreen extends Component {
     constructor(props) {
         super(props)
@@ -28,7 +31,9 @@ class LoginScreen extends Component {
             returnedDataType: definitions.RETURNED_DATA_TYPES.HEXSTRING,
             idInputValue: "",
             sumMsg: "",
-            checkSumMsg: ""
+            checkSumMsg: "",
+            isLoading: false,
+            errorMessage: null
         }
         this.startUsbListener = this.startUsbListener.bind(this);
         this.stopUsbListener = this.stopUsbListener.bind(this);
@@ -66,7 +71,8 @@ class LoginScreen extends Component {
         DeviceEventEmitter.addListener(
             actions.ON_DEVICE_DETACHED,
             (data) => {
-
+                this.stopUsbListener();
+                RNRestart.Restart()
             },
             this
         );
@@ -87,7 +93,8 @@ class LoginScreen extends Component {
         DeviceEventEmitter.addListener(
             actions.ON_DISCONNECTED,
             (data) => {
-
+                this.stopUsbListener();
+                RNRestart.Restart()
             },
             this
         );
@@ -179,13 +186,42 @@ class LoginScreen extends Component {
                     }
                     placeholder={'Enter Your ID'}
                     style={{ width: scale(100), height: scale(50), backgroundColor: 'red', marginTop: scale(30) }} />
-                <TouchableOpacity style={{ width: scale(50), height: scale(50), backgroundColor: 'yellow', marginTop: scale(10) }} onPress={() => {
-                    msgActive = getMessageActiveWithCheckSum(this.state.idInputValue, this.props.OTP)
-                    sendMsg(msgActive, this)
-                }}>
+                <TouchableOpacity
+                    onPress={() => {
+                        this.setState({
+                            ...this.state,
+                            isLoading: true
+                        })
+                        let msgActive = getMessageActiveWithCheckSum(this.state.idInputValue, this.props.OTP) || ""
+                        sendMsg(msgActive, this)
+                        setTimeout(() => {
+                            this.setState({
+                                ...this.state,
+                                isLoading: false
+                            })
+                            if (this.props.isActive) {
+                                this.props.navigation.navigate(ROUTER.MAIN_USER)
+                            } else {
+                                this.setState({
+                                    ...this.state,
+                                    errorMessage: "Đăng nhập thất bại, vui lòng thử lại"
+                                })
+                            }
+                        }, 3000);
+                    }}
+                    style={{ width: scale(50), height: scale(50), backgroundColor: 'yellow', marginTop: scale(10) }}>
                     <Text>Login</Text>
                 </TouchableOpacity>
                 <Text>{'Is active:' + this.props.isActive}</Text>
+                <Text>{'Is loading:' + this.state.isLoading}</Text>
+                {
+                    this.state.errorMessage ? <Text>{this.state.errorMessage}</Text> : null
+                }
+                <TouchableOpacity
+                onPress={()=>{
+                    RNRestart.Restart()
+                }}
+                ><Text>Test Restart</Text></TouchableOpacity>
             </View>
         )
     }
@@ -206,6 +242,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         updateSendCommand: (command) => {
             dispatch(updateSendCommand(command))
+        },
+        refreshStore: () => {
+            dispatch(resetStore())
         }
     }
 }

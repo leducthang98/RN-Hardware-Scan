@@ -36,7 +36,7 @@ export const getMessageWithCheckSum = (msg) => {
 
 export const sendMsg = (msg, context) => {
     setTimeout(() => {
-        context.props.updateSendCommand(msg)
+        context?.props?.updateSendCommand(msg)
         RNSerialport.writeString(msg)
     }, 500)
 }

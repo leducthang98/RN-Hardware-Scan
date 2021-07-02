@@ -28,6 +28,15 @@ export default (state = DEFAULT_STATE, action) => {
                     command: action.payload,
                     isActive: true
                 }
+            } else if (command.includes("(DATA:")) {
+                let split1 = command.split(')')
+                //(DATA:asdas)*123
+                qrData = split1[0].slice(6)
+                return {
+                    ...state,
+                    qrCodeData: qrData
+                }
+
             } else {
                 return {
                     ...state,
@@ -39,6 +48,16 @@ export default (state = DEFAULT_STATE, action) => {
             return {
                 ...state,
                 sendCommand: action.payload
+            }
+        }
+        case 'RESET_STORE': {
+            return {
+                command: "NO COMMAND",
+                OTP: null,
+                isActive: false,
+                listUsers: [],
+                qrCodeData: "",
+                sendCommand: ""
             }
         }
 
