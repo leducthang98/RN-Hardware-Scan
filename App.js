@@ -14,6 +14,7 @@ import { createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import RootReducer from './src/reducer/RootReducer';
 import rootSaga from './src/saga/RootSaga';
+import { Root, Toast } from 'native-base';
 
 const sagaMiddleware = createSagaMiddleware()
 const store = createStore(RootReducer, applyMiddleware(sagaMiddleware, logger))
@@ -22,7 +23,9 @@ export default class App extends React.Component {
   render() {
     return (
       <Provider store={store}>
-        <RootNavigator></RootNavigator>
+        <Root>
+          <RootNavigator></RootNavigator>
+        </Root>
       </Provider>
     );
   }

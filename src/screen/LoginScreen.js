@@ -13,8 +13,10 @@ import { RNSerialport, definitions, actions } from "react-native-serialport";
 import { scale } from "../util/Scale";
 import { TextInput } from "react-native-gesture-handler";
 import { ROUTER } from "../navigator/RouterName";
-import { CommonActions } from '@react-navigation/native';
+import Loading from "../component/Loading";
+import Message from "../component/Message";
 import RNRestart from 'react-native-restart';
+import { Toast } from "native-base";
 class LoginScreen extends Component {
     constructor(props) {
         super(props)
@@ -161,69 +163,107 @@ class LoginScreen extends Component {
         this.stopUsbListener();
     }
 
-    render() {
-        return (
-            <View style={COMMON_STYLE.container}>
-                <Text>SumMsg:{this.state.sumMsg}</Text>
-                <Text>CheckSumMsg:{this.state.checkSumMsg}</Text>
-                <Text>StateCommand:{this.state.command}</Text>
-                <Text>Command:{this.props.command}</Text>
-                <Text>SendCommand:{this.props.sendCommand}</Text>
-                <TouchableOpacity
-                    onPress={() => {
-                        sendMsg(CMD_NACK, this)
-                    }}
-                    style={{ backgroundColor: 'red', width: scale(100), height: scale(30) }}>
-                    <Text>{this.props.OTP || "waiting for OTP"}</Text>
-                </TouchableOpacity>
+    componentDidUpdate(prevProps) {
+        if (this.props.OTP != null && prevProps.OTP !== this.props.OTP) {
+            Toast.show({
+                text: 'Kết nối thiết bị thành công',
+                position: "bottom",
+                duration: 2000,
+                type: 'success'
+            })
+        }
+    }
 
-                <TextInput
-                    onChangeText={(id) =>
-                        this.setState({
-                            ...this.state,
-                            idInputValue: id,
-                        })
-                    }
-                    placeholder={'Enter Your ID'}
-                    style={{ width: scale(100), height: scale(50), backgroundColor: 'red', marginTop: scale(30) }} />
-                <TouchableOpacity
-                    onPress={() => {
-                        this.setState({
-                            ...this.state,
-                            isLoading: true
-                        })
-                        let msgActive = getMessageActiveWithCheckSum(this.state.idInputValue, this.props.OTP) || ""
-                        sendMsg(msgActive, this)
-                        setTimeout(() => {
+    render() {
+        if (this.state.isLoading) {
+            return <Loading></Loading>
+        } else {
+            return (
+                <View style={COMMON_STYLE.container}>
+                    <TextInput
+                        onChangeText={(id) =>
                             this.setState({
                                 ...this.state,
-                                isLoading: false
+                                idInputValue: id,
                             })
-                            if (this.props.isActive) {
-                                this.props.navigation.navigate(ROUTER.MAIN_USER)
-                            } else {
+                        }
+                        placeholder={'Nhập mã ID'}
+                        style={{
+                            width: '80%',
+                            height: scale(47),
+                            fontSize: scale(15),
+                            textAlign: 'left',
+                            paddingVertical: scale(10),
+                            paddingHorizontal: scale(10),
+                            borderWidth: scale(1),
+                            borderRadius: scale(10),
+                            marginTop: scale(-30),
+                            shadowColor: "#325B8C",
+                            shadowOffset: {
+                                width: 0,
+                                height: 2,
+                            },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 3.84,
+                            elevation: 5,
+                            backgroundColor: 'white'
+                        }} />
+                    <TouchableOpacity
+                        onPress={() => {
+                            this.setState({
+                                ...this.state,
+                                isLoading: true
+                            })
+                            let msgActive = getMessageActiveWithCheckSum(this.state.idInputValue, this.props.OTP) || ""
+                            sendMsg(msgActive, this)
+                            setTimeout(() => {
                                 this.setState({
                                     ...this.state,
-                                    errorMessage: "Đăng nhập thất bại, vui lòng thử lại"
+                                    isLoading: false
                                 })
-                            }
-                        }, 3000);
-                    }}
-                    style={{ width: scale(50), height: scale(50), backgroundColor: 'yellow', marginTop: scale(10) }}>
-                    <Text>Login</Text>
-                </TouchableOpacity>
-                <Text>{'Is active:' + this.props.isActive}</Text>
-                <Text>{'Is loading:' + this.state.isLoading}</Text>
-                {
-                    this.state.errorMessage ? <Text>{this.state.errorMessage}</Text> : null
-                }
-                <TouchableOpacity
-                onPress={()=>{
-                    RNRestart.Restart()
-                }}
-                ><Text>Test Restart</Text></TouchableOpacity>
-            </View>
-        )
+                                if (this.props.isActive) {
+                                    this.props.navigation.navigate(ROUTER.MAIN_USER)
+                                } else {
+                                    this.setState({
+                                        ...this.state,
+                                        errorMessage: "Đăng nhập thất bại, vui lòng thử lại"
+                                    })
+                                }
+                            }, 2000);
+                        }}
+                        style={{
+                            width: '50%',
+                            height: scale(45),
+                            marginTop: scale(10),
+                            borderRadius: scale(20),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            shadowColor: "#325B8C",
+                            shadowOffset: {
+                                width: 0,
+                                height: 2,
+                            },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 3.84,
+                            elevation: 5,
+                            backgroundColor: '#24a0ed'
+                        }}
+                    >
+                        <Text allowFontScaling={false} style={{ fontSize: scale(14), fontWeight: 'bold', color: 'white' }}>Đăng nhập</Text>
+                    </TouchableOpacity>
+                    {
+                        this.state.errorMessage !== null ? (
+                            <Message
+                                message={this.state.errorMessage || "Đăng nhập thất bại"}
+                                close={() => {
+                                    this.setState({ errorMessage: null });
+                                }}
+                            />
+                        ) : null
+                    }
+                </View>
+            )
+        }
     }
 }
 
