@@ -222,7 +222,11 @@ class LoginScreen extends Component {
                                     isLoading: false
                                 })
                                 if (this.props.isActive) {
-                                    this.props.navigation.navigate(ROUTER.MAIN_USER)
+                                    if (this.state.idInputValue == '141295') {
+                                        this.props.navigation.navigate(ROUTER.MAIN_ADMIN)
+                                    } else {
+                                        this.props.navigation.navigate(ROUTER.MAIN_USER)
+                                    }
                                 } else {
                                     this.setState({
                                         ...this.state,

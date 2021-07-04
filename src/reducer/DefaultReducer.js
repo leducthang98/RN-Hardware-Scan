@@ -6,7 +6,8 @@ const DEFAULT_STATE = {
     isActive: false,
     listUsers: [],
     qrCodeData: "",
-    sendCommand: ""
+    sendCommand: "",
+    listIdUser: []
 }
 export default (state = DEFAULT_STATE, action) => {
     switch (action.type) {
@@ -34,9 +35,25 @@ export default (state = DEFAULT_STATE, action) => {
                 qrData = split1[0].slice(6)
                 return {
                     ...state,
+                    command: action.payload,
                     qrCodeData: qrData
                 }
 
+            } else if (command.includes("(CMD:DATA|MS:") && !command.includes("END")) {
+                let split1 = command.split(')')
+                //(CMD:DATA|MS:1234,1235)*checksum\n [0]
+                listIdUser = split1[0].slice(13)
+                listIdUserArr = listIdUser.split(',')
+
+                for (let i = 0; i < listIdUserArr.length; i++) {
+                    listIdUserArr[i] -= state.OTP
+                }
+
+                return {
+                    ...state,
+                    command: action.payload,
+                    listIdUser: listIdUserArr
+                }
             } else {
                 return {
                     ...state,
@@ -57,7 +74,8 @@ export default (state = DEFAULT_STATE, action) => {
                 isActive: false,
                 listUsers: [],
                 qrCodeData: "",
-                sendCommand: ""
+                sendCommand: "",
+                listIdUser: []
             }
         }
 
