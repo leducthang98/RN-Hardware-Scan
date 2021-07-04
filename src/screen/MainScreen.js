@@ -40,6 +40,29 @@ class MainScreen extends Component {
                 duration: 2000,
                 type: 'success'
             })
+            this.setState({
+                ...this.state,
+                isLoading: true
+            })
+            axios({
+                method: 'GET',
+                url: GET_ALL_VEHICLE,
+                headers: {
+                    // qrsecret: '123456789',
+                    qrsecret: this.props?.qrCodeData,
+                }
+            }).then((data) => {
+                this.setState({
+                    ...this.state,
+                    isLoading: false,
+                    dataVehicle: data?.data?.data
+                })
+            }).catch((err) => {
+                this.setState({
+                    ...this.state,
+                    errorMessage: err?.response?.data?.message
+                })
+            })
         }
     }
     renderVehicles() {
@@ -53,83 +76,33 @@ class MainScreen extends Component {
         if (this.state.dataVehicle.length == 0) {
             return (
                 <View style={COMMON_STYLE.container}>
-                    {
-                        this.props.qrCodeData ?
-                            <TouchableOpacity
-                                style={{
-                                    width: '80%',
-                                    height: scale(45),
-                                    marginTop: scale(10),
-                                    borderRadius: scale(20),
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    shadowColor: "#325B8C",
-                                    shadowOffset: {
-                                        width: 0,
-                                        height: 2,
-                                    },
-                                    shadowOpacity: 0.25,
-                                    shadowRadius: 3.84,
-                                    elevation: 5,
-                                    backgroundColor: '#24a0ed'
-                                }}
-                                onPress={() => {
-                                    this.setState({
-                                        ...this.state,
-                                        isLoading: true
-                                    })
-                                    axios({
-                                        method: 'GET',
-                                        url: GET_ALL_VEHICLE,
-                                        headers: {
-                                            // qrsecret: '123456789',
-                                            qrsecret: this.props?.qrCodeData,
-                                        }
-                                    }).then((data) => {
-                                        this.setState({
-                                            ...this.state,
-                                            isLoading: false,
-                                            dataVehicle: data?.data?.data
-                                        })
-                                    }).catch((err) => {
-                                        this.setState({
-                                            ...this.state,
-                                            errorMessage: err?.response?.data?.message
-                                        })
-                                    })
-                                }}
-                            >
-                                <Text
-                                    allowFontScaling={false} style={{ fontSize: scale(14), fontWeight: 'bold', color: 'white' }}
-                                >Truy nhập cơ sở dữ liệu</Text>
-                            </TouchableOpacity>
-                            : <TouchableOpacity
-                                style={{
-                                    width: '70%',
-                                    height: scale(45),
-                                    marginTop: scale(10),
-                                    borderRadius: scale(20),
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    shadowColor: "#325B8C",
-                                    shadowOffset: {
-                                        width: 0,
-                                        height: 2,
-                                    },
-                                    shadowOpacity: 0.25,
-                                    shadowRadius: 3.84,
-                                    elevation: 5,
-                                    backgroundColor: '#24a0ed'
-                                }}
-                                onPress={() => {
-                                    sendMsg(CMD_SCAN, this)
-                                }}
-                            >
-                                <Text
-                                    allowFontScaling={false} style={{ fontSize: scale(14), fontWeight: 'bold', color: 'white' }}
-                                >Quét mã QR</Text>
-                            </TouchableOpacity>
-                    }
+                    <TouchableOpacity
+                        style={{
+                            width: '70%',
+                            height: scale(45),
+                            marginTop: scale(10),
+                            borderRadius: scale(20),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            shadowColor: "#325B8C",
+                            shadowOffset: {
+                                width: 0,
+                                height: 2,
+                            },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 3.84,
+                            elevation: 5,
+                            backgroundColor: '#24a0ed'
+                        }}
+                        onPress={() => {
+                            sendMsg(CMD_SCAN, this)
+                        }}
+                    >
+                        <Text
+                            allowFontScaling={false} style={{ fontSize: scale(14), fontWeight: 'bold', color: 'white' }}
+                        >Quét mã QR</Text>
+                    </TouchableOpacity>
+
                     {
                         this.state.errorMessage !== null ? (
                             <Message
