@@ -3,7 +3,8 @@ import {
     Text,
     TouchableOpacity,
     View,
-    DeviceEventEmitter
+    DeviceEventEmitter,
+    AsyncStorage
 } from "react-native";
 import { connect } from "react-redux";
 import { resetStore, updateCommand, updateSendCommand } from "../action/DefaultAction";
@@ -46,7 +47,6 @@ class LoginScreen extends Component {
     }
 
     startUsbListener() {
-        console.log(1)
         DeviceEventEmitter.addListener(
             actions.ON_SERVICE_STARTED,
             (data) => {
@@ -54,7 +54,6 @@ class LoginScreen extends Component {
             },
             this
         );
-        console.log(2)
         DeviceEventEmitter.addListener(
             actions.ON_SERVICE_STOPPED,
             (data) => {
@@ -181,13 +180,17 @@ class LoginScreen extends Component {
             return (
                 <View style={COMMON_STYLE.container}>
                     <TextInput
+                        editable={this.props.OTP ? true : false}
+                        secureTextEntry={true}
+                        keyboardType={"numeric"}
                         onChangeText={(id) =>
                             this.setState({
                                 ...this.state,
                                 idInputValue: id,
                             })
                         }
-                        placeholder={'Nhập mã ID'}
+                        placeholderTextColor={this.props.OTP ? null : 'red'}
+                        placeholder={this.props.OTP ? 'Nhập mã ID' : 'Không tìm thấy thiết bị ghép nối'}
                         style={{
                             width: '80%',
                             height: scale(47),
@@ -208,7 +211,7 @@ class LoginScreen extends Component {
                             elevation: 5,
                             backgroundColor: 'white'
                         }} />
-                    <TouchableOpacity
+                    {this.props.OTP ? <TouchableOpacity
                         onPress={() => {
                             this.setState({
                                 ...this.state,
@@ -216,14 +219,15 @@ class LoginScreen extends Component {
                             })
                             let msgActive = getMessageActiveWithCheckSum(this.state.idInputValue, this.props.OTP) || ""
                             sendMsg(msgActive, this)
-                            setTimeout(() => {
+                            setTimeout(async () => {
                                 this.setState({
                                     ...this.state,
                                     isLoading: false
                                 })
                                 if (this.props.isActive) {
+                                    await AsyncStorage.setItem('user_id', JSON.stringify(this.state.idInputValue))
                                     if (this.state.idInputValue == '141295') {
-                                        this.props.navigation.navigate(ROUTER.MAIN_ADMIN)
+                                        this.props.navigation.navigate(ROUTER.BOTTOM_TAB_ADMIN)
                                     } else {
                                         this.props.navigation.navigate(ROUTER.MAIN_USER)
                                     }
@@ -254,7 +258,9 @@ class LoginScreen extends Component {
                         }}
                     >
                         <Text allowFontScaling={false} style={{ fontSize: scale(14), fontWeight: 'bold', color: 'white' }}>Đăng nhập</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> :
+                        null
+                    }
                     {
                         this.state.errorMessage !== null ? (
                             <Message

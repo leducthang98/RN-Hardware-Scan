@@ -78,6 +78,18 @@ export default (state = DEFAULT_STATE, action) => {
                 listIdUser: []
             }
         }
+        case 'UPDATE_LIST_USER_ID': {
+            return {
+                ...state,
+                listIdUser: action.payload
+            }
+        }
+        case 'UPDATE_QRDATA': {
+            return {
+                ...state,
+                qrCodeData: action.payload
+            }
+        }
 
     }
     return state;

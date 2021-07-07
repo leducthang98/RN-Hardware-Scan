@@ -6,7 +6,7 @@ import LoginScreen from "../screen/LoginScreen";
 import { ROUTER } from "./RouterName";
 import MainScreen from '../screen/MainScreen';
 import AdminScreen from '../screen/AdminScreen';
-
+import BottomTabNavigator from './BottomTabAdmin';
 
 const Stack = createStackNavigator();
 
@@ -17,7 +17,7 @@ function RootNavigator() {
                 <Stack.Screen name={ROUTER.SPLASH_SCREEN} component={SplashScreen} />
                 <Stack.Screen name={ROUTER.LOGIN_SCREEN} component={LoginScreen} />
                 <Stack.Screen name={ROUTER.MAIN_USER} component={MainScreen} />
-                <Stack.Screen name={ROUTER.MAIN_ADMIN} component={AdminScreen} />
+                <Stack.Screen name={ROUTER.BOTTOM_TAB_ADMIN} component={BottomTabNavigator} />
             </Stack.Navigator>
         </NavigationContainer>
     )

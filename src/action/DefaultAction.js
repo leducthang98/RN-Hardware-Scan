@@ -18,3 +18,17 @@ export function updateSendCommand(payload) {
         payload
     })
 }
+
+export function updateListUserId(payload) {
+    return ({
+        type: "UPDATE_LIST_USER_ID",
+        payload
+    })
+}
+
+export function updateQRData(payload) {
+    return ({
+        type: "UPDATE_QRDATA",
+        payload
+    })
+}

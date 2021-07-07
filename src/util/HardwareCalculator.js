@@ -1,4 +1,7 @@
+import axios from "axios"
+import { AsyncStorage } from "react-native"
 import { RNSerialport } from "react-native-serialport"
+import { POST_LOG } from "../constant/EndPoint"
 
 export const CMD_ACK = "(CMD:ACK)*38\n"
 export const CMD_NACK = "(CMD:NACK)*38\n"
@@ -31,10 +34,22 @@ export const getMessageActiveWithCheckSum = (userId, OTP) => {
 }
 
 export const getMessageWithCheckSum = (msg) => {
-    return msg + "*" + checkSum(msg)
+    return msg + "*" + checkSum(msg) + '\n'
 }
 
 export const sendMsg = (msg, context) => {
+    AsyncStorage.getItem("user_id").then((data) => {
+        axios({
+            method: 'POST',
+            url: POST_LOG,
+            data: {
+                user: JSON.parse(data) || 'UNKNOWN',
+                command: msg
+            }
+        }).then(res => {
+            console.log(res)
+        })
+    })
     setTimeout(() => {
         context?.props?.updateSendCommand(msg)
         RNSerialport.writeString(msg)
