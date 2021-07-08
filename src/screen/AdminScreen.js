@@ -53,7 +53,7 @@ class AdminScreen extends Component {
                                         <Text allowFontScaling={false} style={{ fontWeight: 'bold' }}>{showDataItem}</Text>
                                     </DataTable.Cell>
                                     <DataTable.Cell style={{ justifyContent: 'center' }} >
-                                        <Text
+                                        {item != '141295' && <Text
                                             onPress={() => {
                                                 Alert.alert(
                                                     "Lưu ý",
@@ -78,7 +78,7 @@ class AdminScreen extends Component {
                                                 );
                                             }}
                                             allowFontScaling={false} style={{ fontWeight: 'bold', color: 'red' }}
-                                        >Xoá</Text>
+                                        >Xoá</Text>}
                                     </DataTable.Cell>
                                 </DataTable.Row>
                             )
