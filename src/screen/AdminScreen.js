@@ -8,7 +8,8 @@ import {
     ScrollView,
     Alert,
     Image,
-    Modal
+    Modal,
+    BackHandler
 } from "react-native";
 import { connect } from "react-redux";
 import { resetStore, updateCommand, updateListUserId, updateSendCommand } from "../action/DefaultAction";
@@ -18,6 +19,7 @@ import { DataTable } from 'react-native-paper';
 import { scale } from "../util/Scale";
 import { windowHeight, windowWidth } from "../constant/Layout";
 import { BLACK, GRAY_LIGHT, PRIMARY_COLOR, RED, WHITE } from "../constant/Colors";
+import { Toast } from "native-base";
 
 class AdminScreen extends Component {
     constructor(props) {
@@ -30,6 +32,10 @@ class AdminScreen extends Component {
 
     componentDidMount() {
         sendMsg(CMD_GET_ALL_USER, this)
+        BackHandler.addEventListener('hardwareBackPress', function () {
+            console.log('a')
+            return true;
+          });
     }
 
     render() {
@@ -57,7 +63,7 @@ class AdminScreen extends Component {
                                             onPress={() => {
                                                 Alert.alert(
                                                     "Lưu ý",
-                                                    "Xác nhận xoá ID:" + item,
+                                                    "Xác nhận xoá ID:" + showDataItem,
                                                     [
                                                         { text: "Huỷ", onPress: () => console.log('Cancel Pressed') },
                                                         {
@@ -159,16 +165,31 @@ class AdminScreen extends Component {
                                 <TouchableOpacity
                                     disabled={this.state.idInputValue.length !== 6}
                                     onPress={() => {
-                                        let msg = `(CMD:ADDMS|MS:${parseInt(this.state.idInputValue) + parseInt(this.props.OTP)})`
-                                        let msgWithCheckSum = getMessageWithCheckSum(msg)
-                                        sendMsg(msgWithCheckSum, this)
-                                        let currentUserId = [...this.props.listIdUser, parseInt(this.state.idInputValue)]
-                                        this.props.updateListUserId(currentUserId)
-                                        this.setState({
-                                            ...this.state,
-                                            idInputValue: "",
-                                            isDialogVisible: false
-                                        })
+                                        if (!this.props.listIdUser.includes(parseInt(this.state.idInputValue))) {
+                                            let msg = `(CMD:ADDMS|MS:${parseInt(this.state.idInputValue) + parseInt(this.props.OTP)})`
+                                            let msgWithCheckSum = getMessageWithCheckSum(msg)
+                                            sendMsg(msgWithCheckSum, this)
+                                            let currentUserId = [...this.props.listIdUser, parseInt(this.state.idInputValue)]
+                                            this.props.updateListUserId(currentUserId)
+                                            this.setState({
+                                                ...this.state,
+                                                idInputValue: "",
+                                                isDialogVisible: false
+                                            })
+                                        } else {
+                                            Toast.show({
+                                                text: 'ID đã tồn tại',
+                                                position: "bottom",
+                                                duration: 2000,
+                                                type: 'danger'
+                                            })
+                                            this.setState({
+                                                ...this.state,
+                                                idInputValue: "",
+                                                isDialogVisible: false
+                                            })
+                                        }
+
                                     }}
                                     style={{ width: '50%', justifyContent: 'center', alignItems: 'center', padding: scale(10) }} >
                                     <Text allowFontScaling={false} style={{ fontSize: scale(15), fontWeight: 'bold', color: this.state.idInputValue.length !== 6 ? GRAY_LIGHT : BLACK }}>OK</Text>

@@ -31,6 +31,10 @@ class MainScreen extends Component {
         }
     }
     componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', function () {
+            console.log('a')
+            return true;
+        });
         // setTimeout(() => {
         //     this.props.updateCommand('(DATA:123)*1B\n')
         // }, 5000)
